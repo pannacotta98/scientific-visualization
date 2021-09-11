@@ -11,14 +11,16 @@ vec4 ScalarToColorMapping::sample(float t) const {
     if (t <= 0) return vec4(baseColors_.front());
     if (t >= 1) return vec4(baseColors_.back());
 
-    // TODO: use t to select which two base colors to interpolate in-between
+    //// TODO: use t to select which two base colors to interpolate in-between
+    float tScaled = t * (baseColors_.size() - 1.0f);
+    vec4 start = baseColors_[static_cast<size_t>(tScaled)];
+    vec4 end = baseColors_[static_cast<size_t>(tScaled) + 1u];
 
+    //// TODO: Interpolate colors in baseColors_ and set dummy color to result
+    float tLocal = tScaled - static_cast<size_t>(tScaled);
+    auto color = (1.0f - tLocal) * start + tLocal * end;
 
-    // TODO: Interpolate colors in baseColors_ and set dummy color to result
-
-    vec4 finalColor(t, t, t, 1);  // dummy color
-       
-    return finalColor;
+    return color;
 }
 
 }  // namespace inviwo

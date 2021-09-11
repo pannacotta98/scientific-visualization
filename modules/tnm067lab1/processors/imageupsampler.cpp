@@ -28,7 +28,7 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
     auto outIndex = [&outputSize](auto pos) -> size_t {
         pos = glm::clamp(pos, decltype(pos)(0), decltype(pos)(outputSize - size2_t(1)));
         return pos.x + pos.y * outputSize.x;
-    };
+    }; 
 
     util::forEachPixel(outputImage, [&](ivec2 outImageCoords) {
         // outImageCoords: Exact pixel coordinates in the output image currently writing to
@@ -39,22 +39,42 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
 
         T finalColor(0);
 
-        // DUMMY COLOR, remove or overwrite this bellow
-        finalColor = inPixels[inIndex(
-            glm::clamp(size2_t(outImageCoords), size2_t(0), size2_t(inputSize - size2_t(1))))];
+        //// DUMMY COLOR, remove or overwrite this bellow
+        //finalColor = inPixels[inIndex(
+        //    glm::clamp(size2_t(outImageCoords), size2_t(0), size2_t(inputSize - size2_t(1))))];
 
         switch (method) {
             case ImageUpsampler::IntepolationMethod::PiecewiseConstant: {
                 // Task 6
                 // Update finalColor
+                finalColor = inPixels[inIndex(glm::round(inImageCoords))];
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Bilinear: {
-                // Update finalColor
+                ivec2 intPos{ inImageCoords };
+                std::array<T, 4> values = {inPixels[inIndex(intPos)],
+                                           inPixels[inIndex(intPos + ivec2(1, 0))],
+                                           inPixels[inIndex(intPos + ivec2(0, 1))],
+                                           inPixels[inIndex(intPos + ivec2(1, 1))]};
+                double u = inImageCoords.x - intPos.x;
+                double v = inImageCoords.y - intPos.y;
+                finalColor = TNM067::Interpolation::bilinear(values, u, v);
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Biquadratic: {
-                // Update finalColor
+                ivec2 intPos{ inImageCoords };
+                std::array<T, 9> values = {inPixels[inIndex(intPos)],
+                                           inPixels[inIndex(intPos + ivec2(1, 0))],
+                                           inPixels[inIndex(intPos + ivec2(2, 0))],
+                                           inPixels[inIndex(intPos + ivec2(0, 1))],
+                                           inPixels[inIndex(intPos + ivec2(1, 1))],
+                                           inPixels[inIndex(intPos + ivec2(2, 1))],
+                                           inPixels[inIndex(intPos + ivec2(0, 2))],
+                                           inPixels[inIndex(intPos + ivec2(1, 2))],
+                                           inPixels[inIndex(intPos + ivec2(2, 2))]};
+                double u = inImageCoords.x - intPos.x;
+                double v = inImageCoords.y - intPos.y;
+                finalColor = TNM067::Interpolation::biQuadratic(values, u, v);
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Barycentric: {
@@ -119,12 +139,9 @@ void ImageUpsampler::process() {
 }
 
 dvec2 ImageUpsampler::convertCoordinate(ivec2 outImageCoords, size2_t inputSize, size2_t outputSize) {
-    // TODO implement
     dvec2 c(outImageCoords);
-
-    // TASK 5: Convert the outImageCoords to its coordinates in the input image
-
-    return c;
+    dvec2 sizeFactor = static_cast<dvec2>(inputSize) / static_cast<dvec2>(outputSize);
+    return c * sizeFactor;
 }
 
 }  // namespace inviwo

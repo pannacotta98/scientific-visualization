@@ -78,7 +78,14 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Barycentric: {
-                // Update finalColor
+                ivec2 intPos{inImageCoords};
+                std::array<T, 4> values = {inPixels[inIndex(intPos)],
+                                           inPixels[inIndex(intPos + ivec2(1, 0))],
+                                           inPixels[inIndex(intPos + ivec2(0, 1))],
+                                           inPixels[inIndex(intPos + ivec2(1, 1))]};
+                double u = inImageCoords.x - intPos.x;
+                double v = inImageCoords.y - intPos.y;
+                finalColor = TNM067::Interpolation::barycentric(values, u, v);
                 break;
             }
             default:

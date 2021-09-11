@@ -108,9 +108,15 @@ T biQuadratic(const std::array<T, 9>& v, F x, F y) {
 #define ENABLE_BARYCENTRIC_UNITTEST 1
 template <typename T, typename F = double>
 T barycentric(const std::array<T, 4>& v, F x, F y) {
-    F alpha = 1.0 - x - y;
+    x = glm::clamp(x, decltype(x)(0), decltype(x)(1));
+    y = glm::clamp(y, decltype(y)(0), decltype(y)(1));    
 
-    return alpha * v[0] + y * v[1] + x * v[2];
+    if (x + y < 1) { // Lower triangle
+        return ((1 - x - y) * v[0] + x * v[1] + y * v[2]);
+    }    
+    else { // Upper triangle
+        return ((x + y - 1) * v[3] + (1 - y) * v[1] + (1 - x) * v[2]);
+    }
 }
 
 }  // namespace Interpolation

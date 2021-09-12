@@ -39,14 +39,10 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
 
         T finalColor(0);
 
-        //// DUMMY COLOR, remove or overwrite this bellow
-        //finalColor = inPixels[inIndex(
-        //    glm::clamp(size2_t(outImageCoords), size2_t(0), size2_t(inputSize - size2_t(1))))];
+        // TODO Ask lab assistants about offset?
 
         switch (method) {
             case ImageUpsampler::IntepolationMethod::PiecewiseConstant: {
-                // Task 6
-                // Update finalColor
                 finalColor = inPixels[inIndex(glm::round(inImageCoords))];
                 break;
             }
@@ -62,7 +58,7 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Biquadratic: {
-                ivec2 intPos{ inImageCoords };
+                ivec2 intPos{inImageCoords};
                 std::array<T, 9> values = {inPixels[inIndex(intPos)],
                                            inPixels[inIndex(intPos + ivec2(1, 0))],
                                            inPixels[inIndex(intPos + ivec2(2, 0))],
@@ -72,8 +68,8 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
                                            inPixels[inIndex(intPos + ivec2(0, 2))],
                                            inPixels[inIndex(intPos + ivec2(1, 2))],
                                            inPixels[inIndex(intPos + ivec2(2, 2))]};
-                double u = inImageCoords.x - intPos.x;
-                double v = inImageCoords.y - intPos.y;
+                double u = (inImageCoords.x - intPos.x) / 2;
+                double v = (inImageCoords.y - intPos.y) / 2;
                 finalColor = TNM067::Interpolation::biQuadratic(values, u, v);
                 break;
             }

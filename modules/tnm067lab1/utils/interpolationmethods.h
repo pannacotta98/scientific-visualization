@@ -53,8 +53,8 @@ T linear(const T& a, const T& b, F x) {
 #define ENABLE_BILINEAR_UNITTEST 1
 template<typename T, typename F = double> 
 T bilinear(const std::array<T, 4> &v, F x, F y) {
-    x = glm::clamp(x, decltype(x)(0), decltype(x)(1));
-    y = glm::clamp(y, decltype(y)(0), decltype(y)(1));
+    x = glm::clamp(x, F(0), F(1));
+    y = glm::clamp(y, F(0), F(1));
     return linear(linear(v[0], v[1], x), linear(v[2], v[3], x), y);
 }
 
@@ -68,7 +68,7 @@ T bilinear(const std::array<T, 4> &v, F x, F y) {
 #define ENABLE_QUADRATIC_UNITTEST 1
 template <typename T, typename F = double>
 T quadratic(const T& a, const T& b, const T& c, F x) {
-    x = glm::clamp(x, decltype(x)(0), decltype(x)(1));
+    x = glm::clamp(x, F(0), F(1));
     return (1.0-x)*(1-2.0*x)*a + 4.0*x*(1.0-x)*b + x*(2.0*x-1.0)*c;
 }
 
@@ -89,9 +89,12 @@ T quadratic(const T& a, const T& b, const T& c, F x) {
 #define ENABLE_BIQUADRATIC_UNITTEST 1
 template <typename T, typename F = double>
 T biQuadratic(const std::array<T, 9>& v, F x, F y) {
-    x = glm::clamp(x, decltype(x)(0), decltype(x)(1));
-    y = glm::clamp(y, decltype(y)(0), decltype(y)(1));
-    return quadratic(quadratic(v[0], v[1], v[2], x), quadratic(v[3], v[4], v[5], x), quadratic(v[6], v[7], v[8], x), y);
+    x = glm::clamp(x, F(0), F(1));
+    y = glm::clamp(y, F(0), F(1));
+    return quadratic(quadratic(v[0], v[1], v[2], x),
+                     quadratic(v[3], v[4], v[5], x),
+                     quadratic(v[6], v[7], v[8], x),
+                     y);
 }
 
 // clang-format off
@@ -108,8 +111,8 @@ T biQuadratic(const std::array<T, 9>& v, F x, F y) {
 #define ENABLE_BARYCENTRIC_UNITTEST 1
 template <typename T, typename F = double>
 T barycentric(const std::array<T, 4>& v, F x, F y) {
-    x = glm::clamp(x, decltype(x)(0), decltype(x)(1));
-    y = glm::clamp(y, decltype(y)(0), decltype(y)(1));    
+    x = glm::clamp(x, F(0), F(1));
+    y = glm::clamp(y, F(0), F(1));
 
     if (x + y < 1) { // Lower triangle
         return ((1 - x - y) * v[0] + x * v[1] + y * v[2]);

@@ -73,10 +73,29 @@ void MarchingTetrahedra::process() {
                 // Spatial position should be between 0 and 1
 
                 Cell c;
+                
+                for (int dz = 0; dz <= 1; ++dz) {
+                    for (int dy = 0; dy <= 1; ++dy) {
+                        for (int dx = 0; dx <= 1; ++dx) {
+                            ivec3 offsetInCell{dx, dy, dz};
+                            
+                            vec3 scaledPos = calculateDataPointPos(pos, offsetInCell, dims);
+                            size_t index = calculateDataPointIndexInCell(offsetInCell);
+                            float value = volume->getAsDouble(pos);
+
+                            c.dataPoints[index] = MarchingTetrahedra::DataPoint{scaledPos, value, index};
+                        }
+                    }
+                }
 
                 // Step 2: Subdivide cell into tetrahedra (hint: use tetrahedraIds)
                 std::vector<Tetrahedra> tetrahedras;
-
+                for(auto const& ids : tetrahedraIds) {
+                    Tetrahedra t;
+                    for (size_t index = 0; index < 4; ++index)
+                        t.dataPoints[index] = c.dataPoints[ids[index]];
+                    tetrahedras.push_back(t);
+                }
 
                 for (const Tetrahedra& tetrahedra : tetrahedras) {
                     // Step three: Calculate for tetra case index
@@ -84,9 +103,10 @@ void MarchingTetrahedra::process() {
 
                     // step four: Extract triangles
 
-					switch (caseId) {
+                    switch (caseId) {
                         case 0:
                         case 15:
+
                             break;
                         case 1:
                         case 14: {
@@ -134,13 +154,15 @@ void MarchingTetrahedra::process() {
 }
 
 int MarchingTetrahedra::calculateDataPointIndexInCell(ivec3 index3D) {
-    // TODO: TASK 5: map 3D index to 2D
-    return 0;
+    return 1 * index3D.x + 2 * index3D.y + 4 * index3D.z;
 }
 
 vec3 MarchingTetrahedra::calculateDataPointPos(size3_t posVolume, ivec3 posCell, ivec3 dims) {
-    // TODO: TASK 5: scale DataPoint position with dimensions to be between 0 and 1
-    return vec3(0, 0, 0);
+    vec3 posVolumeFloat{posVolume};
+    vec3 posCellFloat{posCell};
+    vec3 scale{dims - 1};
+
+    return (posVolumeFloat + posCellFloat) / scale;
 }
 
 MarchingTetrahedra::MeshHelper::MeshHelper(std::shared_ptr<const Volume> vol)

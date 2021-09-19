@@ -43,19 +43,29 @@ void HydrogenGenerator::process() {
 }
 
 vec3 HydrogenGenerator::cartesianToSpherical(vec3 cartesian) {
-    vec3 sph{cartesian};
+    vec3 sph{0};
 
-    // TASK 1: implement conversion using the equations in the lab script
+    sph.x = glm::length(cartesian);
+
+    if (abs(sph.x) < 0.00001) return sph;
+
+    sph.y = acos(cartesian.z / sph.x);
+    sph.z = atan2(cartesian.y, cartesian.x);
 
     return sph;
 }
 
 double HydrogenGenerator::eval(vec3 cartesian) {
     const double density = cartesian.x;
+    const auto spherical = cartesianToSpherical(cartesian);
 
-    /* TASK 2: Evaluate wave function */
+    double yellow = 1.0 / (81.0 * sqrt(6 * glm::pi<double>()));
+    double red = 1.0;
+    double blue = pow(spherical.x, 2);
+    double green = exp(-1.0 * spherical.x / 3.0);
+    double magenta = 3 * pow(cos(spherical.y), 2) - 1;
 
-    return density;
+    return pow(yellow*red*blue*green*magenta, 2.0);
 }
 
 vec3 HydrogenGenerator::idTOCartesian(size3_t pos) {

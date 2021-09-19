@@ -39,8 +39,6 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
 
         T finalColor(0);
 
-        // TODO Ask lab assistants about offset?
-
         switch (method) {
             case ImageUpsampler::IntepolationMethod::PiecewiseConstant: {
                 finalColor = inPixels[inIndex(glm::round(inImageCoords))];

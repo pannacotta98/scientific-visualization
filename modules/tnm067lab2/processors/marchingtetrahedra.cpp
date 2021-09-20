@@ -73,75 +73,206 @@ void MarchingTetrahedra::process() {
                 // Spatial position should be between 0 and 1
 
                 Cell c;
-                
+
                 for (int dz = 0; dz <= 1; ++dz) {
                     for (int dy = 0; dy <= 1; ++dy) {
                         for (int dx = 0; dx <= 1; ++dx) {
                             ivec3 offsetInCell{dx, dy, dz};
-                            
-                            vec3 scaledPos = calculateDataPointPos(pos, offsetInCell, dims);
-                            size_t index = calculateDataPointIndexInCell(offsetInCell);
-                            float value = volume->getAsDouble(pos);
 
-                            c.dataPoints[index] = MarchingTetrahedra::DataPoint{scaledPos, value, index};
+                            vec3 scaledPos = calculateDataPointPos(pos, offsetInCell, dims);
+                            float value = volume->getAsDouble(pos + size3_t{offsetInCell});
+                            size_t index = indexInVolume(pos + size3_t{offsetInCell});
+
+                            c.dataPoints[calculateDataPointIndexInCell(offsetInCell)] =
+                                MarchingTetrahedra::DataPoint{scaledPos, value, index};
                         }
                     }
                 }
 
                 // Step 2: Subdivide cell into tetrahedra (hint: use tetrahedraIds)
                 std::vector<Tetrahedra> tetrahedras;
-                for(auto const& ids : tetrahedraIds) {
-                    Tetrahedra t;
-                    for (size_t index = 0; index < 4; ++index)
-                        t.dataPoints[index] = c.dataPoints[ids[index]];
-                    tetrahedras.push_back(t);
+                for (auto const& ids : tetrahedraIds) {
+                    Tetrahedra tempTetra;
+                    for (size_t i = 0; i < std::size(ids); ++i)
+                        tempTetra.dataPoints[i] = c.dataPoints[ids[i]];
+                    tetrahedras.push_back(tempTetra);
                 }
+
+                auto interpolatePosFromIso = [iso](const DataPoint& d1, const DataPoint& d2) {
+                    float t = (iso - d1.value) / (d2.value - d1.value);
+                    return glm::lerp(d1.pos, d2.pos, t);
+                };
 
                 for (const Tetrahedra& tetrahedra : tetrahedras) {
                     // Step three: Calculate for tetra case index
                     int caseId = 0;
+                    for (size_t i = 0; i < std::size(tetrahedra.dataPoints); ++i)
+                        if (tetrahedra.dataPoints[i].value > iso) caseId += pow(2, i);
 
                     // step four: Extract triangles
-
                     switch (caseId) {
                         case 0:
                         case 15:
-
                             break;
                         case 1:
                         case 14: {
-
+                            auto v1 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[0],
+                                                      tetrahedra.dataPoints[1]),
+                                tetrahedra.dataPoints[0].index, tetrahedra.dataPoints[1].index);
+                            auto v2 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[0],
+                                                      tetrahedra.dataPoints[3]),
+                                tetrahedra.dataPoints[0].index, tetrahedra.dataPoints[3].index);
+                            auto v3 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[0],
+                                                      tetrahedra.dataPoints[2]),
+                                tetrahedra.dataPoints[0].index, tetrahedra.dataPoints[2].index);
+                            if (caseId == 1)
+                                mesh.addTriangle(v1, v2, v3);
+                            else
+                                mesh.addTriangle(v1, v3, v2);
                             break;
                         }
                         case 2:
                         case 13: {
-
+                            auto v1 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[1],
+                                                      tetrahedra.dataPoints[0]),
+                                tetrahedra.dataPoints[1].index, tetrahedra.dataPoints[0].index);
+                            auto v2 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[1],
+                                                      tetrahedra.dataPoints[2]),
+                                tetrahedra.dataPoints[1].index, tetrahedra.dataPoints[2].index);
+                            auto v3 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[1],
+                                                      tetrahedra.dataPoints[3]),
+                                tetrahedra.dataPoints[1].index, tetrahedra.dataPoints[3].index);
+                            if (caseId == 2)
+                                mesh.addTriangle(v1, v2, v3);
+                            else
+                                mesh.addTriangle(v1, v3, v2);
                             break;
                         }
                         case 3:
                         case 12: {
-
-
+                            auto v1 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[1],
+                                                      tetrahedra.dataPoints[3]),
+                                tetrahedra.dataPoints[1].index, tetrahedra.dataPoints[3].index);
+                            auto v2 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[0],
+                                                      tetrahedra.dataPoints[3]),
+                                tetrahedra.dataPoints[0].index, tetrahedra.dataPoints[3].index);
+                            auto v3 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[0],
+                                                      tetrahedra.dataPoints[2]),
+                                tetrahedra.dataPoints[0].index, tetrahedra.dataPoints[2].index);
+                            auto v4 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[1],
+                                                      tetrahedra.dataPoints[2]),
+                                tetrahedra.dataPoints[1].index, tetrahedra.dataPoints[2].index);
+                            if (caseId == 3) {
+                                mesh.addTriangle(v1, v2, v4);
+                                mesh.addTriangle(v2, v3, v4);
+                            } else {
+                                mesh.addTriangle(v1, v4, v2);
+                                mesh.addTriangle(v2, v4, v3);
+                            }
                             break;
                         }
                         case 4:
                         case 11: {
-
+                            auto v1 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[2],
+                                                      tetrahedra.dataPoints[0]),
+                                tetrahedra.dataPoints[2].index, tetrahedra.dataPoints[0].index);
+                            auto v2 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[2],
+                                                      tetrahedra.dataPoints[3]),
+                                tetrahedra.dataPoints[2].index, tetrahedra.dataPoints[3].index);
+                            auto v3 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[2],
+                                                      tetrahedra.dataPoints[1]),
+                                tetrahedra.dataPoints[2].index, tetrahedra.dataPoints[1].index);
+                            if (caseId == 4)
+                                mesh.addTriangle(v1, v2, v3);
+                            else
+                                mesh.addTriangle(v1, v3, v2);
                             break;
                         }
                         case 5:
                         case 10: {
-
+                            auto v1 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[0],
+                                                      tetrahedra.dataPoints[1]),
+                                tetrahedra.dataPoints[0].index, tetrahedra.dataPoints[1].index);
+                            auto v2 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[1],
+                                                      tetrahedra.dataPoints[2]),
+                                tetrahedra.dataPoints[1].index, tetrahedra.dataPoints[2].index);
+                            auto v3 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[3],
+                                                      tetrahedra.dataPoints[2]),
+                                tetrahedra.dataPoints[3].index, tetrahedra.dataPoints[2].index);
+                            auto v4 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[0],
+                                                      tetrahedra.dataPoints[3]),
+                                tetrahedra.dataPoints[0].index, tetrahedra.dataPoints[3].index);
+                            if (caseId == 10) {
+                                mesh.addTriangle(v1, v2, v4);
+                                mesh.addTriangle(v2, v3, v4);
+                            } else {
+                                mesh.addTriangle(v1, v4, v2);
+                                mesh.addTriangle(v2, v4, v3);
+                            }
                             break;
                         }
                         case 6:
                         case 9: {
-
+                            auto v1 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[0],
+                                                      tetrahedra.dataPoints[1]),
+                                tetrahedra.dataPoints[0].index, tetrahedra.dataPoints[1].index);
+                            auto v2 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[1],
+                                                      tetrahedra.dataPoints[3]),
+                                tetrahedra.dataPoints[1].index, tetrahedra.dataPoints[3].index);
+                            auto v3 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[3],
+                                                      tetrahedra.dataPoints[2]),
+                                tetrahedra.dataPoints[3].index, tetrahedra.dataPoints[2].index);
+                            auto v4 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[2],
+                                                      tetrahedra.dataPoints[0]),
+                                tetrahedra.dataPoints[2].index, tetrahedra.dataPoints[0].index);
+                            if (caseId == 9) {
+                                mesh.addTriangle(v1, v2, v4);
+                                mesh.addTriangle(v2, v3, v4);
+                            } else {
+                                mesh.addTriangle(v1, v4, v2);
+                                mesh.addTriangle(v2, v4, v3);
+                            }
                             break;
                         }
                         case 7:
                         case 8: {
-
+                            auto v1 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[3],
+                                                      tetrahedra.dataPoints[1]),
+                                tetrahedra.dataPoints[3].index, tetrahedra.dataPoints[1].index);
+                            auto v2 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[3],
+                                                      tetrahedra.dataPoints[2]),
+                                tetrahedra.dataPoints[3].index, tetrahedra.dataPoints[2].index);
+                            auto v3 = mesh.addVertex(
+                                interpolatePosFromIso(tetrahedra.dataPoints[3],
+                                                      tetrahedra.dataPoints[0]),
+                                tetrahedra.dataPoints[3].index, tetrahedra.dataPoints[0].index);
+                            if (caseId == 8)
+                                mesh.addTriangle(v1, v2, v3);
+                            else
+                                mesh.addTriangle(v1, v3, v2);
                             break;
                         }
                     }

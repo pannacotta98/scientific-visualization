@@ -128,7 +128,7 @@ void MarchingTetrahedra::process() {
                                 interpolatePosFromIso(tetrahedra.dataPoints[0],
                                                       tetrahedra.dataPoints[2]),
                                 tetrahedra.dataPoints[0].index, tetrahedra.dataPoints[2].index);
-                            if (caseId == 1)
+                            if (caseId == 14)
                                 mesh.addTriangle(v1, v2, v3);
                             else
                                 mesh.addTriangle(v1, v3, v2);
@@ -148,7 +148,7 @@ void MarchingTetrahedra::process() {
                                 interpolatePosFromIso(tetrahedra.dataPoints[1],
                                                       tetrahedra.dataPoints[3]),
                                 tetrahedra.dataPoints[1].index, tetrahedra.dataPoints[3].index);
-                            if (caseId == 2)
+                            if (caseId == 13)
                                 mesh.addTriangle(v1, v2, v3);
                             else
                                 mesh.addTriangle(v1, v3, v2);
@@ -172,7 +172,7 @@ void MarchingTetrahedra::process() {
                                 interpolatePosFromIso(tetrahedra.dataPoints[1],
                                                       tetrahedra.dataPoints[2]),
                                 tetrahedra.dataPoints[1].index, tetrahedra.dataPoints[2].index);
-                            if (caseId == 3) {
+                            if (caseId == 12) {
                                 mesh.addTriangle(v1, v2, v4);
                                 mesh.addTriangle(v2, v3, v4);
                             } else {
@@ -195,7 +195,7 @@ void MarchingTetrahedra::process() {
                                 interpolatePosFromIso(tetrahedra.dataPoints[2],
                                                       tetrahedra.dataPoints[1]),
                                 tetrahedra.dataPoints[2].index, tetrahedra.dataPoints[1].index);
-                            if (caseId == 4)
+                            if (caseId == 11)
                                 mesh.addTriangle(v1, v2, v3);
                             else
                                 mesh.addTriangle(v1, v3, v2);
@@ -219,7 +219,7 @@ void MarchingTetrahedra::process() {
                                 interpolatePosFromIso(tetrahedra.dataPoints[0],
                                                       tetrahedra.dataPoints[3]),
                                 tetrahedra.dataPoints[0].index, tetrahedra.dataPoints[3].index);
-                            if (caseId == 10) {
+                            if (caseId == 5) {
                                 mesh.addTriangle(v1, v2, v4);
                                 mesh.addTriangle(v2, v3, v4);
                             } else {
@@ -246,7 +246,7 @@ void MarchingTetrahedra::process() {
                                 interpolatePosFromIso(tetrahedra.dataPoints[2],
                                                       tetrahedra.dataPoints[0]),
                                 tetrahedra.dataPoints[2].index, tetrahedra.dataPoints[0].index);
-                            if (caseId == 9) {
+                            if (caseId == 6) {
                                 mesh.addTriangle(v1, v2, v4);
                                 mesh.addTriangle(v2, v3, v4);
                             } else {
@@ -269,7 +269,7 @@ void MarchingTetrahedra::process() {
                                 interpolatePosFromIso(tetrahedra.dataPoints[3],
                                                       tetrahedra.dataPoints[0]),
                                 tetrahedra.dataPoints[3].index, tetrahedra.dataPoints[0].index);
-                            if (caseId == 8)
+                            if (caseId == 7)
                                 mesh.addTriangle(v1, v2, v3);
                             else
                                 mesh.addTriangle(v1, v3, v2);

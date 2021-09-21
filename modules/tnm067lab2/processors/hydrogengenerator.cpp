@@ -56,7 +56,6 @@ vec3 HydrogenGenerator::cartesianToSpherical(vec3 cartesian) {
 }
 
 double HydrogenGenerator::eval(vec3 cartesian) {
-    const double density = cartesian.x;
     const auto spherical = cartesianToSpherical(cartesian);
 
     double yellow = 1.0 / (81.0 * sqrt(6 * glm::pi<double>()));

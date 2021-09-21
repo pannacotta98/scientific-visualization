@@ -93,7 +93,7 @@ void MarchingTetrahedra::process() {
                 std::vector<Tetrahedra> tetrahedras;
                 for (auto const& ids : tetrahedraIds) {
                     Tetrahedra tempTetra;
-                    for (size_t i = 0; i < std::size(ids); ++i)
+                    for (std::size_t i = 0; i < std::size(ids); ++i)
                         tempTetra.dataPoints[i] = c.dataPoints[ids[i]];
                     tetrahedras.push_back(tempTetra);
                 }
